@@ -6,29 +6,22 @@ import gzip
 import json
 import os
 
+from common import JsonToDict
+
 def ValidateArgs(cml_args):
   if not os.path.exists(cml_args.profile_json):
     raise FileNotFoundError(f"Profile JSON '{cml_args.profile_json}' not found.")
 
 def ExtractTotalTimePerMnemonic(profile_json, mnemonic):
-  json_raw = ""
   sum = 0
   num_actions = 0
 
-  if profile_json.endswith(".gz"):
-    with gzip.open(profile_json, "r") as f:
-      json_raw = f.read()
-  else:
-    with open(profile_json, "r") as f:
-      json_raw = f.read()
+  profile_dict = JsonToDict(profile_json)
 
-  # TODO(tedx): Loads the entire thing at once. Consider using streaming API for
-  # larger json files.
-  profile_dict = json.loads(json_raw)
   for event in profile_dict["traceEvents"]:
     arg_mnemonic = ""
     if "args" in event and "mnemonic" in event["args"]:
-        arg_mnemonic = event["args"]["mnemonic"]
+      arg_mnemonic = event["args"]["mnemonic"]
     if mnemonic in event["name"] or mnemonic in arg_mnemonic:
       num_actions += 1
       # Duration in microseconds is the "dur" field
