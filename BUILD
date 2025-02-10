@@ -11,3 +11,9 @@ py_binary(
   srcs = ["extract_total_time_per_mnemonic.py"],
   deps = [":common"],
 )
+
+py_binary(
+  name = "dump_critical_path",
+  srcs = ["dump_critical_path.py"],
+  deps = [":common"],
+)
