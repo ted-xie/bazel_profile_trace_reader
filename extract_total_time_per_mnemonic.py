@@ -26,7 +26,10 @@ def ExtractTotalTimePerMnemonic(profile_json, mnemonic):
   # larger json files.
   profile_dict = json.loads(json_raw)
   for event in profile_dict["traceEvents"]:
-    if mnemonic in event["name"]:
+    arg_mnemonic = ""
+    if "args" in event and "mnemonic" in event["args"]:
+        arg_mnemonic = event["args"]["mnemonic"]
+    if mnemonic in event["name"] or mnemonic in arg_mnemonic:
       num_actions += 1
       # Duration in microseconds is the "dur" field
       sum += event["dur"]
