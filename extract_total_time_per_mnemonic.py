@@ -14,9 +14,12 @@ def ValidateArgs(cml_args):
 
 def ExtractTotalTimePerMnemonic(profile_json, mnemonic):
   sum = 0
+  total_wall_time = 0
   num_actions = 0
 
   profile_dict = JsonToDict(profile_json)
+
+  durations = []
 
   for event in profile_dict["traceEvents"]:
     arg_mnemonic = ""
@@ -26,8 +29,25 @@ def ExtractTotalTimePerMnemonic(profile_json, mnemonic):
       num_actions += 1
       # Duration in microseconds is the "dur" field
       sum += event["dur"]
+      durations.append(event["dur"])
+    total_wall_time += event["dur"] if "dur" in event else 0
 
-  ret_dict = {"num_actions": num_actions, "total_cpu_time": sum}
+  # Calculate p25, p50, p90 durations
+  num_events = len(durations)
+  durations = sorted(durations)
+  p25 = durations[int(num_events / 4)]
+  p50 = durations[int(num_events / 2)]
+  p90 = durations[int(num_events * 0.90)]
+
+  ret_dict = {
+          "total_actions": len(profile_dict["traceEvents"]),
+          "num_actions": num_actions,
+          "total_cpu_time": sum,
+          "total_wall_time": total_wall_time,
+          "p25_time": p25,
+          "p50_time": p50,
+          "p90_time": p90
+          }
   return ret_dict
 
 def ExtractTotalTimePerMnemonicMain():
@@ -40,10 +60,17 @@ def ExtractTotalTimePerMnemonicMain():
   ValidateArgs(args)
 
   ret_dict = ExtractTotalTimePerMnemonic(args.profile_json, args.mnemonic)
-  total_actions = ret_dict["num_actions"]
+  bazel_total_actions = ret_dict["total_actions"]
+  total_mnemonic_actions = ret_dict["num_actions"]
   total_time_us = ret_dict["total_cpu_time"]
-  print(f"Total number of actions for {args.mnemonic} was {total_actions}.")
+  total_wall_time = ret_dict["total_wall_time"]
+  print(f"Total wall time: {total_wall_time} microseconds.")
+  print(f"Total number of Bazel actions was {bazel_total_actions}")
+  print(f"Total number of actions for {args.mnemonic} was {total_mnemonic_actions}.")
   print(f"Total time for {args.mnemonic} was {total_time_us} microseconds.")
+  print(f"P25 time for {args.mnemonic} was {ret_dict['p25_time']} microseconds.")
+  print(f"P50 time for {args.mnemonic} was {ret_dict['p50_time']} microseconds.")
+  print(f"P90 time for {args.mnemonic} was {ret_dict['p90_time']} microseconds.")
 
 if __name__ == "__main__":
   ExtractTotalTimePerMnemonicMain()
