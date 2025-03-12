@@ -38,6 +38,8 @@ def ExtractTotalTimePerMnemonic(profile_json, mnemonic):
   p25 = durations[int(num_events / 4)]
   p50 = durations[int(num_events / 2)]
   p90 = durations[int(num_events * 0.90)]
+  p95 = durations[int(num_events * 0.95)]
+  p99 = durations[int(num_events * 0.99)]
 
   ret_dict = {
           "total_actions": len(profile_dict["traceEvents"]),
@@ -46,7 +48,9 @@ def ExtractTotalTimePerMnemonic(profile_json, mnemonic):
           "total_wall_time": total_wall_time,
           "p25_time": p25,
           "p50_time": p50,
-          "p90_time": p90
+          "p90_time": p90,
+          "p95_time": p95,
+          "p99_time": p99
           }
   return ret_dict
 
@@ -71,6 +75,8 @@ def ExtractTotalTimePerMnemonicMain():
   print(f"P25 time for {args.mnemonic} was {ret_dict['p25_time']} microseconds.")
   print(f"P50 time for {args.mnemonic} was {ret_dict['p50_time']} microseconds.")
   print(f"P90 time for {args.mnemonic} was {ret_dict['p90_time']} microseconds.")
+  print(f"P95 time for {args.mnemonic} was {ret_dict['p95_time']} microseconds.")
+  print(f"P99 time for {args.mnemonic} was {ret_dict['p99_time']} microseconds.")
 
 if __name__ == "__main__":
   ExtractTotalTimePerMnemonicMain()
